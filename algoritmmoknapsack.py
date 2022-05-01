@@ -1,11 +1,13 @@
-from queue import PriorityQueue
-import sys
 import math
+import sys
+import numpy as np
+
 
 class Item:
     def __init__(self, peso: int, valor: int) -> None:
         self.peso = peso
         self.valor = valor
+        self.valorRedondeado = -1
 
 
 class Categoria:
@@ -39,6 +41,8 @@ def compareByWeight(x: Item):
     return x.peso
 
 
+cantidadItems = 0
+maxItems = 0
 while i < len(inputLines):
     categoria = inputLines[i:i+3]
     rango = categoria[0].split("\t")
@@ -50,6 +54,8 @@ while i < len(inputLines):
     items = []
     for peso, valor in zip(pesos, valores):
         items.append(Item(peso, valor))
+        cantidadItems += 1
+    maxItems = len(items) if len(items) >= maxItems else maxItems
     items = sorted(items, key=compareByWeight)
     matrizItems[categoriaActual] = items
     i += 3
@@ -105,7 +111,113 @@ def paso1():
 
     for pair in markForDeletion:
         matrizItems[pair[0]].remove(matrizItems[pair[0]][pair[1]])
+
+    max = -1
+    for categoria in matrizItems:
+        for item in categoria:
+            max = item.valor if item.valor >= max else max
+    return max
+
+
+vmax = paso1()
+
+
+def paso2():
+    global vmax, cantidadItems, epsilon
+    for categoria in matrizItems:
+        for item in categoria:
+            item.valorRedondeado = math.floor(((item.valor)/(epsilon*vmax))*cantidadItems)
+            # print(f"value: {item.valor}, rounded: {item.valorRedondeado}")
     return
 
 
-paso1()
+paso2()
+
+
+def paso3():
+    vBound = math.ceil(math.pow(cantidadItems, 2)/epsilon)
+    dp1 = np.zeros((cantidadCategorias, maxItems, vBound, maxItems+1))
+    rangei = range(0, cantidadCategorias)
+    rangej = range(0, maxItems)
+    rangev = range(0, vBound)
+    ranget = range(0, maxItems+1)
+    # vraro = range (0, vBound)
+
+    # for i in rangei:
+    #     j = 1
+    #     currentItem = matrizItems[i][j] if j < len(matrizItems[i]) else matrizItems[i][len(matrizItems[i])-1]
+    #     itemValor = currentItem.valor
+    #     itemPeso = currentItem.peso
+    #     dp1[i, 1, 0, 0] = 0
+    #     dp1[i, 1, currentItem.valor, 0]
+
+    for i in rangei:
+        for j in rangej:
+            for v in rangev:
+                for t in ranget:
+                    # base cases
+                    currentItem = matrizItems[i][j] if j < len(matrizItems[i]) else matrizItems[i][len(matrizItems[i])-1]
+                    itemValor = currentItem.valorRedondeado
+                    itemPeso = currentItem.peso
+                    if j == 0 and v == itemValor and t == 1:
+                        weight = itemPeso
+                        dp1[i, j, v, t] = weight
+                    elif j == 0 and t == 0 and v == 0:
+                        dp1[i, j, v, t] = 0
+                    elif j == 0 and v != itemValor:
+                        dp1[i, j, v, t] = float("inf")
+                    # induction cases
+                    elif v < currentItem.valor or t == 0:
+                        dp1[i, j, v, t] = dp1[i, j-1, v, t]
+                    else:
+                        searchMinRange = range(0, v+1)
+                        minWeightFound = float("inf")
+                        for s in searchMinRange:
+                            dpItem1p = dp1[i, j-1, v-s, t-1] + itemPeso
+                            dpItem2p = dp1[i, j-1, v, t]
+                            minWeightFound = min(dpItem1p, dpItem2p, minWeightFound)
+                        dp1[i, j, v, t] = minWeightFound
+    return dp1
+
+
+def paso4(dp1):
+    vBound = math.ceil(math.pow(cantidadItems, 2)/epsilon)
+    dp2 = np.zeros((cantidadCategorias, vBound))
+    rangei = range(0, cantidadCategorias)
+    rangev = range(0, vBound)
+    for i in rangei:
+        for v in rangev:
+            ranget = range(rangosInferiores[0], rangosSuperiores[0]+1)
+            if i == 0:
+                dp1values = [dp1[0, len(matrizItems[i])-1, v, t] for t in ranget]
+                dp2[0, v] = min(dp1values)
+            else:
+                mindp2Value = float("inf")
+                rangevSub = range(0, v)
+                for tr in ranget:
+                    for subv in rangevSub:
+                        mindp2Value = min(dp2[i-1, subv] + dp1[i, len(matrizItems[i])-1, v-subv, tr], mindp2Value)
+                dp2[i, v] = mindp2Value
+    return dp2
+
+
+def paso5(dp2):
+    found = False
+    vmax = 0
+    col = dp2[cantidadCategorias-1]
+    valueRange = len(col)-1
+    while not found:
+        vmax = valueRange
+        if col[valueRange] <= capacidad:
+            found = True
+        valueRange -= 1
+    return vmax
+
+
+matrizA = paso3()
+
+matrizB = paso4(matrizA)
+
+resultado = paso5(matrizB)
+
+print(resultado)
