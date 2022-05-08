@@ -153,6 +153,6 @@ def iterateRandom(s: int):
     return solMenorActual, maxValor + precalculatedValue
 
 
-sol = iterateRandom(5000)
+sol = iterateRandom(int(math.log2(cantidadItems*cantidadCategorias)))
 
 print(sol[0], sol[1])
