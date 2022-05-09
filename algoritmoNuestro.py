@@ -63,13 +63,13 @@ while i < len(inputLines):
     i += 3
     categoriaActual += 1
 
-print(f"categorias: {cantidadCategorias}; capacidad: {capacidad}; epsilon: {epsilon}")
-for i in range(cantidadCategorias):
-    print(f"cat. actual: {i}")
-    print(f"rangoInferior: {rangosInferiores[i]}")
-    print(f"rangoSuperior: {rangosSuperiores[i]}")
-    print(f"pesos: {matrizPesos[i]}")
-    print(f"valores: {matrizValores[i]}")
+# print(f"categorias: {cantidadCategorias}; capacidad: {capacidad}; epsilon: {epsilon}")
+# for i in range(cantidadCategorias):
+#     print(f"cat. actual: {i}")
+#     print(f"rangoInferior: {rangosInferiores[i]}")
+#     print(f"rangoSuperior: {rangosSuperiores[i]}")
+#     print(f"pesos: {matrizPesos[i]}")
+#     print(f"valores: {matrizValores[i]}")
 
 # comparatorPeso=lambda x,y
 
@@ -155,4 +155,5 @@ def iterateRandom(s: int):
 
 sol = iterateRandom(int(math.log2(cantidadItems*cantidadCategorias)))
 
-print(sol[0], sol[1])
+# print(sol[0], sol[1])
+print(sol[1])

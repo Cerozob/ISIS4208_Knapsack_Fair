@@ -61,13 +61,13 @@ while i < len(inputLines):
     i += 3
     categoriaActual += 1
 
-print(f"categorias: {cantidadCategorias}; capacidad: {capacidad}; epsilon: {epsilon}")
-for i in range(cantidadCategorias):
-    print(f"cat. actual: {i}")
-    print(f"rangoInferior: {rangosInferiores[i]}")
-    print(f"rangoSuperior: {rangosSuperiores[i]}")
-    print(f"pesos: {matrizPesos[i]}")
-    print(f"valores: {matrizValores[i]}")
+# print(f"categorias: {cantidadCategorias}; capacidad: {capacidad}; epsilon: {epsilon}")
+# for i in range(cantidadCategorias):
+#     print(f"cat. actual: {i}")
+#     print(f"rangoInferior: {rangosInferiores[i]}")
+#     print(f"rangoSuperior: {rangosSuperiores[i]}")
+#     print(f"pesos: {matrizPesos[i]}")
+#     print(f"valores: {matrizValores[i]}")
 
 # comparatorPeso=lambda x,y
 
@@ -136,20 +136,28 @@ paso2()
 
 def paso3():
     vBound = math.ceil(math.pow(cantidadItems, 2)/epsilon)
-    dp1 = np.zeros((cantidadCategorias, maxItems, vBound, maxItems+1))
+    dp1 = np.full((cantidadCategorias, maxItems, vBound, maxItems+1), float("inf"))
     rangei = range(0, cantidadCategorias)
-    rangej = range(0, maxItems)
+    rangej = range(1, maxItems)
     rangev = range(0, vBound)
     ranget = range(0, maxItems+1)
     # vraro = range (0, vBound)
 
-    # for i in rangei:
-    #     j = 1
-    #     currentItem = matrizItems[i][j] if j < len(matrizItems[i]) else matrizItems[i][len(matrizItems[i])-1]
-    #     itemValor = currentItem.valor
-    #     itemPeso = currentItem.peso
-    #     dp1[i, 1, 0, 0] = 0
-    #     dp1[i, 1, currentItem.valor, 0]
+    for i in range(0, cantidadCategorias):
+        for v in range(0, vBound):
+            for t in range(0, maxItems+1):
+                j = 0
+                # base cases
+                currentItem = matrizItems[i][j] if j < len(matrizItems[i]) else matrizItems[i][len(matrizItems[i])-1]
+                itemValor = currentItem.valorRedondeado
+                itemPeso = currentItem.peso
+                if v == itemValor and t == 1:
+                    weight = itemPeso
+                    dp1[i, j, v, t] = weight
+                elif t == 0 and v == 0:
+                    dp1[i, j, v, t] = 0
+                # elif v != itemValor:
+                #     dp1[i, j, v, t] = float("inf")
 
     for i in rangei:
         for j in rangej:
@@ -159,45 +167,51 @@ def paso3():
                     currentItem = matrizItems[i][j] if j < len(matrizItems[i]) else matrizItems[i][len(matrizItems[i])-1]
                     itemValor = currentItem.valorRedondeado
                     itemPeso = currentItem.peso
-                    if j == 0 and v == itemValor and t == 1:
-                        weight = itemPeso
-                        dp1[i, j, v, t] = weight
-                    elif j == 0 and t == 0 and v == 0:
-                        dp1[i, j, v, t] = 0
-                    elif j == 0 and v != itemValor:
-                        dp1[i, j, v, t] = float("inf")
+                    # if j == 0 and v == itemValor and t == 1:
+                    #     weight = itemPeso
+                    #     dp1[i, j, v, t] = weight
+                    # elif j == 0 and t == 0 and v == 0:
+                    #     dp1[i, j, v, t] = 0
+                    # elif j == 0 and v != itemValor:
+                    #     dp1[i, j, v, t] = float("inf")
                     # induction cases
-                    elif v < currentItem.valor or t == 0:
+                    if v < currentItem.valor or t == 0:
                         dp1[i, j, v, t] = dp1[i, j-1, v, t]
                     else:
-                        searchMinRange = range(0, v+1)
-                        minWeightFound = float("inf")
-                        for s in searchMinRange:
-                            dpItem1p = dp1[i, j-1, v-s, t-1] + itemPeso
-                            dpItem2p = dp1[i, j-1, v, t]
-                            minWeightFound = min(dpItem1p, dpItem2p, minWeightFound)
+                        dpItem2p = dp1[i, j-1, v, t]
+                        dpItems1p = dp1[i, j-1, :v+1, t-1].min() + itemPeso
+                        minWeightFound = min(dpItems1p, dpItem2p)
                         dp1[i, j, v, t] = minWeightFound
     return dp1
 
 
-def paso4(dp1):
+def paso4(dp1: np.ndarray):
     vBound = math.ceil(math.pow(cantidadItems, 2)/epsilon)
     dp2 = np.zeros((cantidadCategorias, vBound))
-    rangei = range(0, cantidadCategorias)
+    rangei = range(1, cantidadCategorias)
     rangev = range(0, vBound)
+
+    for v in range(0, vBound):
+        dp2[0, v] = dp1[0, len(matrizItems[0])-1, v, rangosInferiores[0]:rangosSuperiores[0]+1].min()
+        # dp1values = [dp1[0, len(matrizItems[0])-1, v, t] for t in ranget]
+        # dp2[0, v] = min(dp1values)
+
     for i in rangei:
         for v in rangev:
-            ranget = range(rangosInferiores[0], rangosSuperiores[0]+1)
-            if i == 0:
-                dp1values = [dp1[0, len(matrizItems[i])-1, v, t] for t in ranget]
-                dp2[0, v] = min(dp1values)
-            else:
-                mindp2Value = float("inf")
-                rangevSub = range(0, v)
-                for tr in ranget:
-                    for subv in rangevSub:
-                        mindp2Value = min(dp2[i-1, subv] + dp1[i, len(matrizItems[i])-1, v-subv, tr], mindp2Value)
-                dp2[i, v] = mindp2Value
+            minvalue = dp1[i, len(matrizItems[i])-1, :v+1, rangosInferiores[0]:rangosSuperiores[0]+1].min()
+            foundValue = np.where(dp1[i, len(matrizItems[i])-1, :v+1, rangosInferiores[0]:rangosSuperiores[0]+1] == minvalue)
+            vr = v - foundValue[0][0]
+            dp2[i, v] = minvalue + dp2[i-1, vr]
+            # ranget = range(rangosInferiores[0], rangosSuperiores[0]+1)
+            # if i == 0:
+            #     dp1values = [dp1[0, len(matrizItems[i])-1, v, t] for t in ranget]
+            #     dp2[0, v] = min(dp1values)
+            # else:
+            # rangevSub = range(0, v)
+            # for tr in ranget:
+            #     for subv in rangevSub:
+            #         mindp2Value = min(dp2[i-1, subv] + dp1[i, len(matrizItems[i])-1, v-subv, tr], mindp2Value)
+            # dp2[i, v] = mindp2Value
     return dp2
 
 
@@ -219,5 +233,6 @@ matrizA = paso3()
 matrizB = paso4(matrizA)
 
 resultado = paso5(matrizB)
+roundedBack = math.floor((resultado*epsilon*vmax)/(cantidadItems))
 
-print(resultado)
+print(roundedBack)
