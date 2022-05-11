@@ -220,7 +220,7 @@ def paso5(dp2):
     vmax = 0
     col = dp2[cantidadCategorias-1]
     valueRange = len(col)-1
-    while not found:
+    while not found and valueRange >= 0:
         vmax = valueRange
         if col[valueRange] <= capacidad:
             found = True

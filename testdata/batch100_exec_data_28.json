@@ -1,0 +1,45 @@
+{
+	"optimalValue": 1353,
+	"resultPaper": "Traceback (most recent call last):\r\n  File \"C:\\Users\\ceroz\\OneDrive - Universidad de los Andes\\ISIS 4208\\ISIS4208_Knapsack_Fair\\algoritmoPaper.py\", line 235, in <module>\r\n    resultado = paso5(matrizB)\r\n  File \"C:\\Users\\ceroz\\OneDrive - Universidad de los Andes\\ISIS 4208\\ISIS4208_Knapsack_Fair\\algoritmoPaper.py\", line 225, in paso5\r\n    if col[valueRange] <= capacidad:\r\nIndexError: index -312 is out of bounds for axis 0 with size 311\r\n",
+	"resultNuestro": "899\r\n",
+	"timeTakenPaper": 0.5800032615661621,
+	"timeTakenNosotros": 0.3770008087158203,
+	"case": {
+		"input": "5\t1125\t0.7247610103914486\n2\t3\n91\t61\t68\n92\t86\t96\n2\t3\n55\t68\t72\n81\t80\t97\n2\t3\n65\t74\t76\n84\t84\t98\n1\t3\n100\t70\t94\n95\t98\t85\n1\t3\n53\t86\t92\n95\t82\t100",
+		"case": {
+			"lowerRanks": [2, 2, 2, 1, 1],
+			"upperRanks": [3, 3, 3, 3, 3],
+			"nCategories": 5,
+			"optimalValue": 1353,
+			"maxWeight": 1125,
+			"epsilon": 0.7247610103914486,
+			"itemMatrix": [
+				[
+					[91, 92],
+					[61, 86],
+					[68, 96]
+				],
+				[
+					[55, 81],
+					[68, 80],
+					[72, 97]
+				],
+				[
+					[65, 84],
+					[74, 84],
+					[76, 98]
+				],
+				[
+					[100, 95],
+					[70, 98],
+					[94, 85]
+				],
+				[
+					[53, 95],
+					[86, 82],
+					[92, 100]
+				]
+			]
+		}
+	}
+}
