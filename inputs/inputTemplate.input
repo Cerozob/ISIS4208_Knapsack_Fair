@@ -1,0 +1,7 @@
+x   y   z <-> categorias    capacidad   epsilon
+a   b <-> limiteinferior   limitesuperior
+x   y     x   y x   y <-> pesos
+x   y     x   y x   y <-> valores
+a b
+x y x y x y x y x y x y
+x y x y x y x y x y x y
